@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "axios": "^0.25.0",
+    "form-data": "^4.0.0",
+    "myply-common": "https://github.com/rycont/myply-common"
+  }
+}
