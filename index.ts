@@ -52,20 +52,23 @@ export const getPlaylistContent = async (uri: string): Promise<Playlist> => {
     preGenerated: {
       bugs: uri,
     },
-    tracks: rawPlaylist.list.map(
-      (track: { track_title: string; artists: { artist_nm: string }[] }) => ({
-        name: track.track_title,
-        artist: track.artists[0].artist_nm,
-      })
-    ),
+    tracks: (
+      rawPlaylist.list as {
+        track_title: string
+        artists: { artist_nm: string }[]
+        track_id: number
+      }[]
+    ).map((track) => ({
+      name: track.track_title,
+      artist: track.artists[0].artist_nm,
+      channelIds: { bugs: track.track_id.toString() },
+    })),
   }
 }
 
 export const generateURL = async (playlist: Playlist): Promise<string> => {
   return Promise.resolve(
-    `bugs3://app/tracks/lists?title=${encodeURIComponent(
-      playlist.name
-    )}&miniplay=Y&track_ids=${playlist.tracks
+    `bugs3://app/tracks/lists?title=%EC%A0%84%EC%B2%B4%EB%93%A3%EA%B8%B0&miniplay=Y&track_ids=${playlist.tracks
       .map((e) => e.channelIds.bugs)
       .join("|")}`
   )
