@@ -20,7 +20,9 @@ const createFormData = <T extends Record<string, string | number>>(data: T) => {
   ]
 }
 
-export const findSongId = async (song: Song): Promise<string> => {
+const REGEX_FIND_BRAKET = /\(.*\)/
+
+export const findSongId = async (song: Song): Promise<string | null> => {
   const payload = createFormData({
     type: "track",
     query: `${song.artist} ${song.name}`,
@@ -30,9 +32,29 @@ export const findSongId = async (song: Song): Promise<string> => {
     _at: "",
   })
 
-  const res = await axios.post(endpoints.search(), ...payload)
-
-  return res.data.list[0].track_id
+  try {
+    const res = await axios.post(endpoints.search(), ...payload)
+    return res.data.list[0].track_id
+  } catch (e) {
+    if (song.name.match(REGEX_FIND_BRAKET)) {
+      return await findSongId({
+        ...song,
+        name: song.name.replace(REGEX_FIND_BRAKET, "").trim(),
+      })
+    }
+    if (song.artist) {
+      return await findSongId({
+        ...song,
+        artist: "",
+      })
+    }
+    console.log(
+      `Missed Match on Bugs`,
+      song.artist + " " + song.name,
+      (e as Error).message
+    )
+    return null
+  }
 }
 
 export const getPlaylistContent = async (uri: string): Promise<Playlist> => {
